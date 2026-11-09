@@ -1,14 +1,9 @@
-output "vnet_id" {
-  description = "ID of the runner VNet."
-  value       = azurerm_virtual_network.this.id
+output "subnet_id" {
+  description = "Runner subnet ID (manager and worker scale sets)."
+  value       = azurerm_subnet.this.id
 }
 
-output "manager_subnet_id" {
-  description = "Subnet ID for the runner manager VM."
-  value       = azurerm_subnet.manager.id
-}
-
-output "workers_subnet_id" {
-  description = "Subnet ID for the worker scale sets."
-  value       = azurerm_subnet.workers.id
+output "manager_private_ip" {
+  description = "Static private IP reserved for the runner manager."
+  value       = local.manager_private_ip
 }

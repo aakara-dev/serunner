@@ -18,11 +18,6 @@ output "identity_client_id" {
   value       = azurerm_user_assigned_identity.this.client_id
 }
 
-output "config_template" {
-  description = "Rendered config.toml with __PLACEHOLDER__ secrets; stored in Key Vault as runner-config-template."
-  value       = local.config_template
-}
-
 output "concurrent" {
   description = "Computed global `concurrent` value in config.toml."
   value       = local.concurrent

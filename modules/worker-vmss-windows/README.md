@@ -30,7 +30,7 @@ No modules.
 
 | Name | Description | Type | Default | Required |
 | ---- | ----------- | ---- | ------- | :------: |
-| <a name="input_admin_password"></a> [admin\_password](#input\_admin\_password) | Local admin password (generated in the root module, also stored in Key Vault). | `string` | n/a | yes |
+| <a name="input_admin_password"></a> [admin\_password](#input\_admin\_password) | Local admin password (generated in the root module, passed to the manager via custom data). | `string` | n/a | yes |
 | <a name="input_admin_username"></a> [admin\_username](#input\_admin\_username) | Local admin the WinRM connector logs in as. | `string` | `"runner"` | no |
 | <a name="input_computer_name_prefix"></a> [computer\_name\_prefix](#input\_computer\_name\_prefix) | Hostname prefix (Windows: max 9 chars). | `string` | `"ciwin"` | no |
 | <a name="input_git_installer"></a> [git\_installer](#input\_git\_installer) | Pinned Git for Windows installer URL and SHA256. | <pre>object({<br/>    url    = string<br/>    sha256 = string<br/>  })</pre> | n/a | yes |

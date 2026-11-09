@@ -1,5 +1,5 @@
-# Rendered by Terraform, then secrets are injected on the VM by runner-config-render.
-# Placeholders __NAME__ are replaced from Key Vault; never edit tokens in by hand.
+# Rendered by Terraform and written by cloud-init. Edit runner settings in Terraform; a
+# change replaces the manager VM.
 concurrent = ${concurrent}
 check_interval = 0
 shutdown_timeout = 0
@@ -8,7 +8,7 @@ log_level = "info"
 [[runners]]
   name = "${name_prefix}-linux-docker"
   url = "${gitlab_url}"
-  token = "__RUNNER_TOKEN_LINUX__"
+  token = "${runner_token_linux}"
   executor = "docker-autoscaler"
   shell = "sh"
 
@@ -45,7 +45,7 @@ log_level = "info"
 [[runners]]
   name = "${name_prefix}-windows-dotnetfx"
   url = "${gitlab_url}"
-  token = "__RUNNER_TOKEN_WINDOWS__"
+  token = "${runner_token_windows}"
   executor = "instance"
   shell = "powershell"
   # Manager is Linux, executor targets Windows paths.
@@ -69,7 +69,7 @@ log_level = "info"
       os = "windows"
       protocol = "winrm"
       username = "${windows.admin_username}"
-      password = "__WORKER_WINDOWS_PASSWORD__"
+      password = "${worker_windows_password}"
       use_static_credentials = true
       use_external_addr = false
       timeout = "10m"

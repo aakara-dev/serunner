@@ -14,7 +14,12 @@ variable "resource_group_name" {
 }
 
 variable "subnet_id" {
-  description = "Manager subnet ID."
+  description = "Runner subnet ID (shared with the workers)."
+  type        = string
+}
+
+variable "private_ip_address" {
+  description = "Static private IP for the manager; the worker NSG allows SSH/WinRM only from it."
   type        = string
 }
 
@@ -34,19 +39,40 @@ variable "subscription_id" {
   type        = string
 }
 
-variable "workers_resource_group_id" {
-  description = "Resource group ID the manager identity may manage (scale sets live here)."
-  type        = string
-}
-
 variable "workers_resource_group_name" {
   description = "Resource group name of the worker scale sets."
   type        = string
 }
 
-variable "key_vault_name" {
-  description = "Key Vault holding runner tokens and worker credentials."
+variable "scale_set_ids" {
+  description = "Worker scale set IDs the manager identity may scale, keyed by a static name (linux, windows)."
+  type        = map(string)
+}
+
+variable "runner_token_linux" {
+  description = "glrt- authentication token of the Linux runner."
   type        = string
+  sensitive   = true
+}
+
+variable "runner_token_windows" {
+  description = "glrt- authentication token of the Windows runner; empty when Windows is disabled."
+  type        = string
+  sensitive   = true
+  default     = ""
+}
+
+variable "worker_ssh_private_key" {
+  description = "OpenSSH private key the connector uses to reach Linux workers."
+  type        = string
+  sensitive   = true
+}
+
+variable "worker_windows_password" {
+  description = "Windows worker admin password for the WinRM connector; empty when Windows is disabled."
+  type        = string
+  sensitive   = true
+  default     = ""
 }
 
 variable "gitlab_url" {

@@ -1,6 +1,6 @@
 # network
 
-VNet, manager and worker subnets (no default outbound access), and NSGs. Workers accept SSH/WinRM only from the manager subnet.
+One runner subnet in an existing hub-spoke VNet (no default outbound access, optional spoke route table to the hub firewall) and its NSG. The manager gets a static private IP; workers accept SSH/WinRM only from that IP.
 
 <!-- BEGIN_TF_DOCS -->
 ## Requirements
@@ -24,31 +24,28 @@ No modules.
 
 | Name | Type |
 | ---- | ---- |
-| [azurerm_network_security_group.manager](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_security_group) | resource |
-| [azurerm_network_security_group.workers](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_security_group) | resource |
-| [azurerm_subnet.manager](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/subnet) | resource |
-| [azurerm_subnet.workers](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/subnet) | resource |
-| [azurerm_subnet_network_security_group_association.manager](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/subnet_network_security_group_association) | resource |
-| [azurerm_subnet_network_security_group_association.workers](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/subnet_network_security_group_association) | resource |
-| [azurerm_virtual_network.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/virtual_network) | resource |
+| [azurerm_network_security_group.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/network_security_group) | resource |
+| [azurerm_subnet.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/subnet) | resource |
+| [azurerm_subnet_network_security_group_association.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/subnet_network_security_group_association) | resource |
+| [azurerm_subnet_route_table_association.this](https://registry.terraform.io/providers/hashicorp/azurerm/latest/docs/resources/subnet_route_table_association) | resource |
 
 ## Inputs
 
 | Name | Description | Type | Default | Required |
 | ---- | ----------- | ---- | ------- | :------: |
-| <a name="input_address_space"></a> [address\_space](#input\_address\_space) | VNet CIDR. | `string` | `"10.60.0.0/16"` | no |
-| <a name="input_location"></a> [location](#input\_location) | Azure region for all network resources. | `string` | n/a | yes |
-| <a name="input_manager_subnet_prefix"></a> [manager\_subnet\_prefix](#input\_manager\_subnet\_prefix) | CIDR for the runner manager subnet. | `string` | `"10.60.1.0/24"` | no |
+| <a name="input_location"></a> [location](#input\_location) | Azure region for the NSG. | `string` | n/a | yes |
 | <a name="input_name_prefix"></a> [name\_prefix](#input\_name\_prefix) | Short prefix used in resource names, e.g. "glrun". | `string` | n/a | yes |
-| <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | Resource group that holds the VNet and NSGs. | `string` | n/a | yes |
+| <a name="input_resource_group_name"></a> [resource\_group\_name](#input\_resource\_group\_name) | Workload resource group that holds the NSG. | `string` | n/a | yes |
+| <a name="input_route_table_id"></a> [route\_table\_id](#input\_route\_table\_id) | Spoke route table that sends 0.0.0.0/0 to the hub firewall. Null if policy attaches it for you. | `string` | `null` | no |
+| <a name="input_subnet_prefix"></a> [subnet\_prefix](#input\_subnet\_prefix) | Free CIDR inside the spoke VNet for the runner subnet. /27 recommended, /28 minimum. | `string` | n/a | yes |
 | <a name="input_tags"></a> [tags](#input\_tags) | Tags applied to every resource. | `map(string)` | `{}` | no |
-| <a name="input_workers_subnet_prefix"></a> [workers\_subnet\_prefix](#input\_workers\_subnet\_prefix) | CIDR for the autoscaled worker subnet (Linux and Windows VMSS). | `string` | `"10.60.2.0/23"` | no |
+| <a name="input_vnet_name"></a> [vnet\_name](#input\_vnet\_name) | Name of the existing spoke VNet. | `string` | n/a | yes |
+| <a name="input_vnet_resource_group_name"></a> [vnet\_resource\_group\_name](#input\_vnet\_resource\_group\_name) | Resource group of the existing spoke VNet (the subnet is created there). | `string` | n/a | yes |
 
 ## Outputs
 
 | Name | Description |
 | ---- | ----------- |
-| <a name="output_manager_subnet_id"></a> [manager\_subnet\_id](#output\_manager\_subnet\_id) | Subnet ID for the runner manager VM. |
-| <a name="output_vnet_id"></a> [vnet\_id](#output\_vnet\_id) | ID of the runner VNet. |
-| <a name="output_workers_subnet_id"></a> [workers\_subnet\_id](#output\_workers\_subnet\_id) | Subnet ID for the worker scale sets. |
+| <a name="output_manager_private_ip"></a> [manager\_private\_ip](#output\_manager\_private\_ip) | Static private IP reserved for the runner manager. |
+| <a name="output_subnet_id"></a> [subnet\_id](#output\_subnet\_id) | Runner subnet ID (manager and worker scale sets). |
 <!-- END_TF_DOCS -->

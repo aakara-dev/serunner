@@ -1,6 +1,11 @@
-output "key_vault_name" {
-  description = "Key Vault to store runner tokens in (runner-token-linux, runner-token-windows)."
-  value       = module.keyvault.name
+output "resource_group" {
+  description = "Resource group with the manager, worker scale sets, identity and NSG."
+  value       = azurerm_resource_group.this.name
+}
+
+output "subnet_id" {
+  description = "Runner subnet created in the spoke VNet."
+  value       = module.network.subnet_id
 }
 
 output "manager_vm_name" {
@@ -8,14 +13,9 @@ output "manager_vm_name" {
   value       = module.runner_manager.vm_name
 }
 
-output "core_resource_group" {
-  description = "Resource group with network, Key Vault and manager."
-  value       = azurerm_resource_group.core.name
-}
-
-output "workers_resource_group" {
-  description = "Resource group with the worker scale sets."
-  value       = azurerm_resource_group.workers.name
+output "manager_private_ip" {
+  description = "Manager's static private IP (source address seen by the hub firewall and GitLab)."
+  value       = module.network.manager_private_ip
 }
 
 output "linux_vmss_name" {

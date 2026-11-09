@@ -49,12 +49,6 @@ resource "azurerm_linux_virtual_machine_scale_set" "this" {
       name      = "ipcfg"
       primary   = true
       subnet_id = var.subnet_id
-
-      # Per-instance public IP for egress only (NSG blocks inbound). Billed only while
-      # the instance exists, unlike a NAT gateway.
-      public_ip_address {
-        name = "pip"
-      }
     }
   }
 

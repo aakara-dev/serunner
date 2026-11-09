@@ -4,31 +4,39 @@ variable "name_prefix" {
 }
 
 variable "location" {
-  description = "Azure region for all network resources."
+  description = "Azure region for the NSG."
   type        = string
 }
 
 variable "resource_group_name" {
-  description = "Resource group that holds the VNet and NSGs."
+  description = "Workload resource group that holds the NSG."
   type        = string
 }
 
-variable "address_space" {
-  description = "VNet CIDR."
+variable "vnet_resource_group_name" {
+  description = "Resource group of the existing spoke VNet (the subnet is created there)."
   type        = string
-  default     = "10.60.0.0/16"
 }
 
-variable "manager_subnet_prefix" {
-  description = "CIDR for the runner manager subnet."
+variable "vnet_name" {
+  description = "Name of the existing spoke VNet."
   type        = string
-  default     = "10.60.1.0/24"
 }
 
-variable "workers_subnet_prefix" {
-  description = "CIDR for the autoscaled worker subnet (Linux and Windows VMSS)."
+variable "subnet_prefix" {
+  description = "Free CIDR inside the spoke VNet for the runner subnet. /27 recommended, /28 minimum."
   type        = string
-  default     = "10.60.2.0/23"
+
+  validation {
+    condition     = can(cidrhost(var.subnet_prefix, 0)) && tonumber(split("/", var.subnet_prefix)[1]) <= 28
+    error_message = "subnet_prefix must be a valid CIDR of /28 or larger."
+  }
+}
+
+variable "route_table_id" {
+  description = "Spoke route table that sends 0.0.0.0/0 to the hub firewall. Null if policy attaches it for you."
+  type        = string
+  default     = null
 }
 
 variable "tags" {

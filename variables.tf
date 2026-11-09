@@ -12,7 +12,7 @@ variable "location" {
 }
 
 variable "name_prefix" {
-  description = "Short lowercase prefix for resource names (max 8 chars keeps the Key Vault name under 24)."
+  description = "Short lowercase prefix for resource names."
   type        = string
   default     = "glrun"
 
@@ -26,6 +26,29 @@ variable "tags" {
   description = "Extra tags merged onto every resource."
   type        = map(string)
   default     = {}
+}
+
+# --- Network (existing hub-spoke VNet) ------------------------------------------------
+
+variable "vnet_resource_group_name" {
+  description = "Resource group of the existing spoke VNet."
+  type        = string
+}
+
+variable "vnet_name" {
+  description = "Existing spoke VNet the runner subnet is created in."
+  type        = string
+}
+
+variable "subnet_prefix" {
+  description = "Free CIDR in the spoke VNet for the runner subnet. /27 recommended, /28 minimum."
+  type        = string
+}
+
+variable "route_table_id" {
+  description = "Spoke route table sending 0.0.0.0/0 to the hub firewall (copy it from an existing spoke subnet). Null if Azure Policy attaches it."
+  type        = string
+  default     = null
 }
 
 # --- GitLab / runner -------------------------------------------------------------
@@ -77,10 +100,27 @@ variable "manager_admin_ssh_public_key" {
   type        = string
 }
 
-variable "key_vault_allowed_ip_cidrs" {
-  description = "Deployer egress CIDRs allowed to the Key Vault data plane. Empty = any network (RBAC still required)."
-  type        = list(string)
-  default     = []
+variable "runner_token_linux" {
+  description = "glrt- token of the Linux runner. Supply as TF_VAR_runner_token_linux, never in tfvars."
+  type        = string
+  sensitive   = true
+
+  validation {
+    condition     = startswith(var.runner_token_linux, "glrt-")
+    error_message = "runner_token_linux must be a glrt- runner authentication token."
+  }
+}
+
+variable "runner_token_windows" {
+  description = "glrt- token of the Windows runner (required when enable_windows). Supply as TF_VAR_runner_token_windows."
+  type        = string
+  sensitive   = true
+  default     = ""
+
+  validation {
+    condition     = !var.enable_windows || startswith(var.runner_token_windows, "glrt-")
+    error_message = "runner_token_windows must be a glrt- token when enable_windows = true."
+  }
 }
 
 # --- Workers (shared) --------------------------------------------------------------

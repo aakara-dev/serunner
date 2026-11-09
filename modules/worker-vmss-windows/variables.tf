@@ -48,7 +48,7 @@ variable "admin_username" {
 }
 
 variable "admin_password" {
-  description = "Local admin password (generated in the root module, also stored in Key Vault)."
+  description = "Local admin password (generated in the root module, passed to the manager via custom data)."
   type        = string
   sensitive   = true
 }

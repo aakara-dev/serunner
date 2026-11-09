@@ -55,10 +55,6 @@ resource "azurerm_windows_virtual_machine_scale_set" "this" {
       name      = "ipcfg"
       primary   = true
       subnet_id = var.subnet_id
-
-      public_ip_address {
-        name = "pip"
-      }
     }
   }
 

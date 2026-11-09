@@ -1,13 +1,23 @@
-# Copy to terraform.tfvars (git-ignored) and fill in. No secrets belong here.
-subscription_id              = "00000000-0000-0000-0000-000000000000"
-gitlab_url                   = "https://gitlab.example.com"
-manager_admin_ssh_public_key = "ssh-ed25519 AAAA... you@laptop"
+# Copy to terraform.tfvars (git-ignored) and fill in. No secrets belong here: runner
+# tokens go in TF_VAR_runner_token_linux / TF_VAR_runner_token_windows.
+subscription_id = "00000000-0000-0000-0000-000000000000"
+gitlab_url      = "https://gitlab.example.com"
+
+# Public half of your break-glass key (ssh-keygen -t rsa -b 4096 -f ~/.ssh/glrun_manager),
+# or export TF_VAR_manager_admin_ssh_public_key="$(cat ~/.ssh/glrun_manager.pub)".
+# manager_admin_ssh_public_key = "ssh-rsa AAAA... glrun-manager"
 
 location    = "eastus"
 name_prefix = "glrun"
 
-# Lock Key Vault data plane to your egress IP (curl -s https://ifconfig.me).
-# key_vault_allowed_ip_cidrs = ["203.0.113.10/32"]
+# Existing spoke VNet and a free /27 inside it.
+vnet_resource_group_name = "rg-spoke-network"
+vnet_name                = "vnet-spoke"
+subnet_prefix            = "10.0.0.0/27"
+
+# Route table that sends 0.0.0.0/0 to the hub firewall. Copy it from a working spoke subnet:
+#   az network vnet subnet show -g <rg> --vnet-name <vnet> -n <subnet> --query routeTable.id -o tsv
+# route_table_id = "/subscriptions/.../resourceGroups/.../providers/Microsoft.Network/routeTables/rt-spoke"
 
 use_spot       = false
 enable_windows = true
