@@ -1,0 +1,46 @@
+#cloud-config
+package_update: true
+packages:
+  - curl
+  - jq
+  - python3
+
+write_files:
+  - path: /usr/local/sbin/render-runner-config
+    permissions: "0700"
+    content: |
+      ${indent(6, render_script)}
+  - path: /etc/systemd/system/gitlab-runner.service.d/azure.conf
+    permissions: "0644"
+    content: |
+      [Service]
+      # fleeting-plugin-azure uses DefaultAzureCredential; this selects the user-assigned identity.
+      Environment=AZURE_CLIENT_ID=${client_id}
+      Environment=FLEETING_PLUGIN_PATH=/opt/fleeting/plugins
+  - path: /etc/systemd/system/runner-config-render.service
+    permissions: "0644"
+    content: |
+      [Unit]
+      Description=Render GitLab Runner config from Key Vault
+      Wants=network-online.target
+      After=network-online.target
+      StartLimitIntervalSec=0
+
+      [Service]
+      Type=oneshot
+      ExecStart=/usr/local/sbin/render-runner-config
+      Restart=on-failure
+      RestartSec=60
+
+      [Install]
+      WantedBy=multi-user.target
+
+runcmd:
+  - mkdir -p /opt/fleeting/plugins /var/lib/gitlab-runner
+  - curl -sfL -o /usr/local/bin/gitlab-runner "${runner_binary_url}"
+  - echo "${runner_binary_sha256}  /usr/local/bin/gitlab-runner" | sha256sum -c -
+  - chmod 0755 /usr/local/bin/gitlab-runner
+  - gitlab-runner install --user root --working-directory /var/lib/gitlab-runner --config /etc/gitlab-runner/config.toml
+  - systemctl daemon-reload
+  - systemctl enable gitlab-runner
+  - systemctl enable --now runner-config-render.service --no-block

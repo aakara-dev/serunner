@@ -1,0 +1,19 @@
+#cloud-config
+# Linux CI worker: Docker Engine only. Job toolchains come from per-job container images.
+# The runner manager waits on `cloud-init status --wait` (instance_ready_command) before
+# scheduling a job here.
+package_update: true
+packages:
+  - docker.io
+  - git
+runcmd:
+  - systemctl enable --now docker
+  # The connector SSHes in as the admin user and talks to the Docker socket.
+  - usermod -aG docker ${admin_username}
+  # Reclaim disk from old images between jobs on reused instances.
+  - |
+    cat >/etc/cron.daily/docker-prune <<'EOF'
+    #!/bin/sh
+    docker system prune -af --filter "until=24h" >/dev/null 2>&1 || true
+    EOF
+  - chmod 0755 /etc/cron.daily/docker-prune
